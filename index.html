@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>タスク育成アドベンチャー</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Yomogi&display=swap');
+        body { font-family: 'Yomogi', sans-serif; background-color: #f8f8f8; text-align: center; margin: 0; padding: 0; }
+        h1 { margin: 20px 0; font-family: 'Yomogi', sans-serif; font-size: 3em; color: #2F4F4F; font-weight: bold;}
+        h2, h3 { margin: 10px 0; font-family: 'Yomogi', sans-serif; color: #2F4F4F; }
+        .container { display: flex; justify-content: center; align-items: flex-start; padding: 20px; gap: 20px; }
+        .task-container { display: flex; flex-direction: column; align-items: flex-start; padding: 10px; background-color: #d9beba; border: 2px solid #2F4F4F; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); }
+        .task { margin: 5px; padding: 10px; background-color: #f7ebe9; border: 2px solid #2F4F4F; border-radius: 10px; min-width: 150px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); }
+        #town { position: relative; width: 720px; height: 405px; background-color: #ffffff; border: 2px solid #2F4F4F; border-radius: 10px; margin-top: 20px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); }
+        .town-part { position: absolute; transition: transform 0.5s ease, background-color 1s ease; display: flex; align-items: center; justify-content: center; border-radius: 10px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); font-size: 5em}
+        #effect { display: none; font-size: 30px; }
+        .background { position: relative; }
+        .background::before { content: '🌳🏢🌈🚗🌻🌸🏠🌴🌲🌷🌼🌺🍀タスク育成アドベンチャー'; position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%); font-size: 8em; color: rgba(255, 255, 255, 0.1); z-index: -1; }
+        #comments, #completed-tasks { width: 100%; text-align: left; background-color: #cddcd5; border: 2px solid #2F4F4F; border-radius: 10px; padding: 10px; margin-top: 20px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); }
+        .line { width: 100%; height: 2px; background-color: #2F4F4F; margin: 10px 0; }
+        .logo { font-size: 2em; color: #2F4F4F; font-family: 'Yomogi', sans-serif; }
+        .town-name { font-size: 1.5em; color: #2F4F4F; font-family: 'Yomogi', sans-serif; }
+    </style>
+</head>
+<body class="background">
+    <h1 class="logo">タスク育成アドベンチャー</h1>
+    <div class="container">
+        <div class="task-container">
+            <div>
+                <input type="text" id="task-input" placeholder="タスクを入力">
+                <button onclick="addTask()">追加</button>
+            </div>
+            <div id="task-list"></div>
+        </div>
+        <div id="character">
+            <h2 class="town-name">アウトサイド</h2>
+            <div id="town"></div>
+            <p id="character-status">ステージ: 1</p>
+        </div>
+    </div>
+    <div class="line"></div>
+    <div id="effect">✨</div>
+    <div id="comments">
+        <h3>進行履歴</h3>
+        <ul id="comments-list"></ul>
+    </div>
+    <div id="completed-tasks">
+        <h3>達成したタスク</h3>
+        <ul id="completed-tasks-list"></ul>
+    </div>
+    <script>
+        let tasks = [];
+        let stage = 1;
+
+        function addTask() {
+            const taskInput = document.getElementById('task-input');
+            const task = taskInput.value;
+            if (task) {
+                tasks.push(task);
+                taskInput.value = '';
+                renderTasks();
+            }
+        }
+
+        function completeTask(index) {
+            const completedTasksList = document.getElementById('completed-tasks-list');
+            const task = tasks.splice(index, 1)[0];
+            const completedTaskItem = document.createElement('li');
+            completedTaskItem.innerText = task;
+            completedTasksList.appendChild(completedTaskItem);
+            renderTasks();
+            updateCharacter(task);
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                taskList.innerHTML += `<div class="task">${task} <button onclick="completeTask(${index})">完了</button></div>`;
+            });
+        }
+
+        function updateCharacter(task) {
+            const characterStatus = document.getElementById('character-status');
+            const townNameElement = document.querySelector('.town-name');
+            const effect = document.getElementById('effect');
+            const commentsList = document.getElementById('comments-list');
+            const town = document.getElementById('town');
+
+            stage++;
+            characterStatus.innerText = `ステージ: ${stage}`;
+
+            // アニメーション効果
+            const newPart = document.createElement('div');
+            newPart.className = 'town-part';
+            newPart.style.backgroundColor = getRandomColor();
+            newPart.style.top = `${Math.random() * 355}px`;
+            newPart.style.left = `${Math.random() * 670}px`;
+            newPart.style.width = `${getRandomSize()}px`;
+            newPart.style.height = `${getRandomSize()}px`;
+            newPart.innerHTML = getRandomEmoji();
+            town.appendChild(newPart);
+
+            newPart.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                newPart.style.transform = 'scale(1)';
+            }, 500);
+
+            // 視覚効果
+            effect.style.display = 'block';
+            setTimeout(() => {
+                effect.style.display = 'none';
+            }, 1000);
+
+            // コメント追加
+            const comment = document.createElement('li');
+            comment.innerText = `素晴らしい！ステージ ${stage} まで進みました。引き続きがんばってくださいね！`;
+            commentsList.appendChild(comment);
+
+            // 特別な演出
+            if (stage % 5 === 0) {
+                specialEffect(town);
+            }
+
+            // 町の名前の更新
+            updateTownName();
+        }
+
+        function getRandomEmoji() {
+            const emojis = ['🏠', '🌳', '🏢', '🚗', '🛤️', '🌻', '🌈', '🦉', '🐈', '🐕', '🗼', '🎡', '🛳️', '✈️', '🏰'];
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        }
+
+        function getRandomColor() {
+            const colors = ['#2F4F4F', '#A9A9A9', '#D3D3D3', '#A0522D', '#8FBC8F', '#F5FFFA', '#F0E68C', '#FFE4B5'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function getRandomSize() {
+            return 53 + Math.floor(Math.random() * 30);
+        }
+
+        function specialEffect(town) {
+            const fireworks = document.createElement('div');
+            fireworks.innerHTML = '🎆🎇✨';
+            fireworks.style.position = 'absolute';
+            fireworks.style.top = '50%';
+            fireworks.style.left = '50%';
+            fireworks.style.transform = 'translate(-50%,            -50%)';
+            fireworks.style.fontSize = '3em';
+            town.appendChild(fireworks);
+            setTimeout(() => {
+                fireworks.remove();
+            }, 3000);
+        }
+
+        function updateTownName() {
+            const townNameElement = document.querySelector('.town-name');
+            let townType;
+            if (stage < 5) {
+                townType = 'アウトサイド';
+            } else if (stage < 10) {
+                townType = 'ビレッジ';
+            } else if (stage < 15) {
+                townType = 'タウン';
+            } else if (stage < 20) {
+                townType = 'ストリート';
+            } else {
+                townType = 'ランド';
+            }
+
+            const townPartCounts = getTownPartCounts();
+            const emojiToName = {
+                '🏠': '家の',
+                '🌳': '緑の',
+                '🏢': '高層',
+                '🚗': '車の',
+                '🛤️': '線路の',
+                '🌻': '花の',
+                '🌈': '夢の',
+                '🦉': 'フクロウの',
+                '🐈': '猫の',
+                '🐕': '犬の',
+                '🗼': 'タワーの',
+                '🎡': '遊園地の',
+                '🛳️': '港の',
+                '✈️': '空の',
+                '🏰': '城の'
+            };
+
+            for (const [emoji, name] of Object.entries(emojiToName)) {
+                if (townPartCounts[emoji] > 2) {
+                    townType = `${name}${townType}`;
+                    break;
+                }
+            }
+
+            townNameElement.innerText = townType;
+        }
+
+        function getTownPartCounts() {
+            const townParts = document.querySelectorAll('.town-part');
+            const counts = {};
+            townParts.forEach(part => {
+                const content = part.innerHTML;
+                if (!counts[content]) {
+                    counts[content] = 0;
+                }
+                counts[content]++;
+            });
+            return counts;
+        }
+    </script>
+</body>
+</html>
